@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/is-alive", "destination": "/api/is-alive" }
+  ]
+}
+
