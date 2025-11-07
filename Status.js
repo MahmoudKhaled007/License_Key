@@ -1,41 +1,28 @@
 // Use "type": "module" in package.json to use ES module imports
-import express from 'express';
+import { createServer } from 'http';
 
-// Create an Express application
-const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// 1. Main Page Route ("/")
-app.get('/', (request, response) => {
-  response.status(200).json({
-    message: "Welcome to the main page!",
-    api_status_url: "/status" // Changed this to point to the new endpoint
-  });
-});
+const server = createServer((req, res) => {
+  // for example: GET /is-alive
+  if (req.method === 'GET' && req.url === '/is-alive') {
+    
+    // Read the value from Vercel's Environment Variables.
+    // process.env variables are always strings, so we compare to the string "true".
+    // Default to `true` if the variable isn't set.
+    const isOk = process.env.API_STATUS_OK ? (process.env.API_STATUS_OK === 'true') : true;
 
-// 2. Status Endpoint ("/status")
-app.get('/status', (request, response) => {
-  // Read the value from Vercel's Environment Variables.
-  // process.env variables are always strings, so we compare to the string "true".
-  const isOk = process.env.API_STATUS_OK === 'true';
-
-  if (isOk) {
-    // If isOk is true, return a 200 OK status
-    response.status(200).json({
-      status: true
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
     });
+    res.end(JSON.stringify({ ok: isOk }));
   } else {
-    // If isOk is false, return a 401 Unauthorized status
-    response.status(401).json({
-      msg: "Please contact Mahmoud"
-    });
+    // any other route
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: false }));
   }
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
-
-// Export the app for Vercel
-export default app;
